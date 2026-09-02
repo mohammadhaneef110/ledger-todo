@@ -244,16 +244,17 @@
     margin-top:6px;
   }
   .logout-btn{
-    margin-top:12px;
     background:none;
     border:1px solid var(--line);
     color:var(--ink-soft);
-    padding:9px;
+    padding:8px 14px;
     border-radius:var(--radius-s);
     font-size:12.5px;
+    font-weight:600;
     cursor:pointer;
+    flex-shrink:0;
   }
-  .logout-btn:hover{ background:var(--paper-dim); }
+  .logout-btn:hover{ background:var(--paper-dim); color:var(--ink); }
 
   .main{
     flex:1;
@@ -480,7 +481,7 @@
       overflow-x:auto;
       gap:6px;
     }
-    .brand, .brand-tag, .sidebar-divider, .streak-box, .sync-box, .logout-btn{ display:none; }
+    .brand, .brand-tag, .sidebar-divider, .streak-box, .sync-box{ display:none; }
     .nav-item{ white-space:nowrap; margin-bottom:0; }
     .main{ padding:24px 18px 50px; }
     .stat-strip{ flex-wrap:wrap; }
@@ -550,7 +551,6 @@
       <div class="streak-num" id="streak-num">0</div>
       <div class="streak-label">tasks completed today</div>
     </div>
-    <button class="logout-btn" id="logout-btn">Sign out</button>
   </div>
 
   <div class="main">
@@ -561,6 +561,7 @@
       </div>
       <div class="progress-wrap">
         <div class="progress-text" id="progress-text">0 of 0 done</div>
+        <button class="logout-btn" id="logout-btn">Sign out</button>
       </div>
     </div>
 
