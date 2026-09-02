@@ -3,18 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Ledger — Task Dashboard</title>
 <style>
   :root{
-    --ink:#1B2430;
-    --ink-soft:#3B4656;
-    --paper:#F7F5F0;
-    --paper-dim:#EFEBE2;
-    --line:#DCD6C8;
+    --ink:#1B2A41;
+    --ink-soft:#48607D;
+    --paper:#F1F5FA;
+    --paper-dim:#E3EBF3;
+    --line:#CCDBEA;
     --gold:#B8892B;
     --gold-soft:#EFE0BC;
-    --sage:#5C7A62;
-    --sage-soft:#E1E9DE;
+    --sage:#3C7A8C;
+    --sage-soft:#DCEAEF;
     --coral:#C4553F;
     --coral-soft:#F3DDD6;
     --white:#FFFFFF;
@@ -33,14 +35,129 @@
     -webkit-font-smoothing:antialiased;
   }
 
-  .app{
+  /* ---------- AUTH SCREEN ---------- */
+  .auth-screen{
+    min-height:100vh;
     display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  .auth-box{
+    width:100%;
+    max-width:360px;
+  }
+  .auth-brand{
+    font-size:24px;
+    font-weight:700;
+    letter-spacing:-0.02em;
+    margin-bottom:4px;
+    text-align:center;
+  }
+  .auth-tag{
+    font-size:13px;
+    color:var(--ink-soft);
+    text-align:center;
+    margin-bottom:32px;
+  }
+  .auth-field{
+    margin-bottom:14px;
+  }
+  .auth-field label{
+    display:block;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+    font-weight:600;
+  }
+  .auth-field input{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:var(--radius-s);
+    background:var(--white);
+    font-size:15px;
+    font-family:var(--font);
+    color:var(--ink);
+  }
+  .auth-field input:focus{
+    outline:none;
+    border-color:var(--ink);
+  }
+  .password-wrap{
+    position:relative;
+  }
+  .password-wrap input{
+    padding-right:44px;
+  }
+  .toggle-pw{
+    position:absolute;
+    right:10px;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    cursor:pointer;
+    padding:6px;
+    color:var(--ink-soft);
+    font-size:12.5px;
+    font-weight:600;
+  }
+  .toggle-pw:hover{ color:var(--ink); }
+  .auth-submit{
+    width:100%;
+    padding:13px;
+    background:var(--ink);
+    color:var(--paper);
+    border:none;
+    border-radius:var(--radius-s);
+    font-size:14.5px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:6px;
+  }
+  .auth-submit:disabled{ opacity:0.5; cursor:default; }
+  .auth-switch{
+    text-align:center;
+    margin-top:18px;
+    font-size:13.5px;
+    color:var(--ink-soft);
+  }
+  .auth-switch button{
+    background:none;
+    border:none;
+    color:var(--ink);
+    font-weight:700;
+    cursor:pointer;
+    font-size:13.5px;
+    text-decoration:underline;
+  }
+  .auth-error{
+    background:var(--coral-soft);
+    color:var(--coral);
+    padding:10px 12px;
+    border-radius:var(--radius-s);
+    font-size:13px;
+    margin-bottom:14px;
+    display:none;
+  }
+  .auth-error.show{ display:block; }
+  .auth-loading{
+    text-align:center;
+    color:var(--ink-soft);
+    font-size:14px;
+    padding-top:80px;
+  }
+
+  /* ---------- APP LAYOUT ---------- */
+  .app{
+    display:none;
     min-height:100vh;
     max-width:1200px;
     margin:0 auto;
   }
+  .app.show{ display:flex; }
 
-  /* ---------- SIDEBAR ---------- */
   .sidebar{
     width:230px;
     flex-shrink:0;
@@ -87,6 +204,24 @@
     margin:22px 0;
   }
 
+  .sync-box{
+    padding:12px 14px;
+    background:var(--paper-dim);
+    border-radius:var(--radius-m);
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .sync-dot{
+    display:inline-block;
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:var(--sage);
+    margin-right:6px;
+  }
+  .sync-dot.offline{ background:var(--gold); }
+
   .streak-box{
     margin-top:auto;
     padding:16px 14px;
@@ -104,8 +239,18 @@
     opacity:0.7;
     margin-top:6px;
   }
+  .logout-btn{
+    margin-top:12px;
+    background:none;
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    padding:9px;
+    border-radius:var(--radius-s);
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .logout-btn:hover{ background:var(--paper-dim); }
 
-  /* ---------- MAIN ---------- */
   .main{
     flex:1;
     padding:36px 40px 60px;
@@ -132,7 +277,6 @@
     margin-top:4px;
   }
 
-  /* stat strip - deliberately NOT identical cards */
   .stat-strip{
     display:flex;
     border-top:1px solid var(--line);
@@ -157,7 +301,6 @@
   .stat.accent .stat-num{ color:var(--coral); }
   .stat.good .stat-num{ color:var(--sage); }
 
-  /* add task bar */
   .add-bar{
     display:flex;
     gap:10px;
@@ -201,7 +344,6 @@
   }
   .add-btn:hover{ opacity:0.85; }
 
-  /* task groups */
   .group-label{
     font-size:12.5px;
     font-weight:600;
@@ -312,7 +454,6 @@
     margin-bottom:6px;
   }
 
-  /* progress ring in header */
   .progress-wrap{
     display:flex;
     align-items:center;
@@ -335,7 +476,7 @@
       overflow-x:auto;
       gap:6px;
     }
-    .brand, .brand-tag, .sidebar-divider, .streak-box{ display:none; }
+    .brand, .brand-tag, .sidebar-divider, .streak-box, .sync-box, .logout-btn{ display:none; }
     .nav-item{ white-space:nowrap; margin-bottom:0; }
     .main{ padding:24px 18px 50px; }
     .stat-strip{ flex-wrap:wrap; }
@@ -350,7 +491,36 @@
 </head>
 <body>
 
-<div class="app">
+<!-- AUTH SCREEN -->
+<div class="auth-screen" id="auth-screen">
+  <div class="auth-box">
+    <div class="auth-brand">Ledger</div>
+    <div class="auth-tag" id="auth-tag">Sign in to sync your tasks everywhere</div>
+    <div class="auth-error" id="auth-error"></div>
+    <div class="auth-field">
+      <label>Email</label>
+      <input type="email" id="auth-email" autocomplete="email">
+    </div>
+    <div class="auth-field">
+      <label>Password</label>
+      <div class="password-wrap">
+        <input type="password" id="auth-password" autocomplete="current-password">
+        <button type="button" class="toggle-pw" id="toggle-pw">Show</button>
+      </div>
+    </div>
+    <button class="auth-submit" id="auth-submit">Sign in</button>
+    <div class="auth-switch">
+      <span id="auth-switch-text">Don't have an account?</span>
+      <button id="auth-switch-btn">Create one</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div class="auth-loading" id="auth-loading">Loading…</div>
+
+<!-- APP -->
+<div class="app" id="app">
   <div class="sidebar">
     <div class="brand">Ledger</div>
     <div class="brand-tag">Your day, accounted for</div>
@@ -370,10 +540,13 @@
 
     <div class="sidebar-divider"></div>
 
+    <div class="sync-box" id="sync-box"><span class="sync-dot"></span>Synced</div>
+
     <div class="streak-box">
       <div class="streak-num" id="streak-num">0</div>
       <div class="streak-label">tasks completed today</div>
     </div>
+    <button class="logout-btn" id="logout-btn">Sign out</button>
   </div>
 
   <div class="main">
@@ -421,12 +594,42 @@
   </div>
 </div>
 
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // ============================================================
+  // PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console)
+  // ============================================================
+  const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+  // ============================================================
+
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  db.enablePersistence({ synchronizeTabs: true }).catch(function(err){
+    console.warn('Offline persistence not enabled:', err.code);
+  });
+</script>
+
 <script>
 (function(){
-  const STORAGE_KEY = 'ledger:tasks';
   let tasks = [];
   let currentView = 'today';
   let loaded = false;
+  let currentUser = null;
+  let unsubscribe = null;
+  let isSignupMode = false;
 
   const $ = (id) => document.getElementById(id);
   const todayStr = () => {
@@ -434,25 +637,126 @@
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   };
 
-  function uid(){ return 't' + Date.now() + Math.random().toString(36).slice(2,7); }
-
-  async function loadTasks(){
-    try{
-      const res = await window.storage.get(STORAGE_KEY, false);
-      tasks = res ? JSON.parse(res.value) : [];
-    }catch(e){
-      tasks = [];
-    }
-    loaded = true;
-    render();
+  // ---------------- AUTH ----------------
+  function showAuthError(msg){
+    const el = $('auth-error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+  function hideAuthError(){
+    $('auth-error').classList.remove('show');
   }
 
-  async function saveTasks(){
-    try{
-      await window.storage.set(STORAGE_KEY, JSON.stringify(tasks), false);
-    }catch(e){
-      console.error('Could not save tasks', e);
+  $('toggle-pw').addEventListener('click', () => {
+    const pwInput = $('auth-password');
+    const btn = $('toggle-pw');
+    if(pwInput.type === 'password'){
+      pwInput.type = 'text';
+      btn.textContent = 'Hide';
+    } else {
+      pwInput.type = 'password';
+      btn.textContent = 'Show';
     }
+  });
+
+  $('auth-switch-btn').addEventListener('click', () => {
+    isSignupMode = !isSignupMode;
+    hideAuthError();
+    if(isSignupMode){
+      $('auth-tag').textContent = 'Create an account to get started';
+      $('auth-submit').textContent = 'Create account';
+      $('auth-switch-text').textContent = 'Already have an account?';
+      $('auth-switch-btn').textContent = 'Sign in';
+    } else {
+      $('auth-tag').textContent = 'Sign in to sync your tasks everywhere';
+      $('auth-submit').textContent = 'Sign in';
+      $('auth-switch-text').textContent = "Don't have an account?";
+      $('auth-switch-btn').textContent = 'Create one';
+    }
+  });
+
+  $('auth-submit').addEventListener('click', () => {
+    hideAuthError();
+    const email = $('auth-email').value.trim();
+    const password = $('auth-password').value;
+    if(!email || !password){
+      showAuthError('Enter both email and password.');
+      return;
+    }
+    if(password.length < 6){
+      showAuthError('Password must be at least 6 characters.');
+      return;
+    }
+    $('auth-submit').disabled = true;
+    const action = isSignupMode
+      ? auth.createUserWithEmailAndPassword(email, password)
+      : auth.signInWithEmailAndPassword(email, password);
+    action.catch((err) => {
+      showAuthError(friendlyAuthError(err.code));
+    }).finally(() => {
+      $('auth-submit').disabled = false;
+    });
+  });
+
+  function friendlyAuthError(code){
+    const map = {
+      'auth/email-already-in-use': 'This email is already registered. Try signing in instead.',
+      'auth/invalid-email': 'That email address looks invalid.',
+      'auth/user-not-found': 'No account found with this email.',
+      'auth/wrong-password': 'Incorrect password.',
+      'auth/weak-password': 'Password is too weak — use at least 6 characters.',
+      'auth/invalid-credential': 'Incorrect email or password.'
+    };
+    return map[code] || 'Something went wrong. Please try again.';
+  }
+
+  $('logout-btn').addEventListener('click', () => {
+    auth.signOut();
+  });
+
+  auth.onAuthStateChanged((user) => {
+    $('auth-loading').style.display = 'none';
+    if(user){
+      currentUser = user;
+      $('auth-screen').style.display = 'none';
+      $('app').classList.add('show');
+      attachTaskListener();
+    } else {
+      currentUser = null;
+      if(unsubscribe) unsubscribe();
+      tasks = [];
+      loaded = false;
+      $('app').classList.remove('show');
+      $('auth-screen').style.display = 'flex';
+    }
+  });
+
+  // network status indicator
+  function updateSyncBox(){
+    const box = $('sync-box');
+    if(navigator.onLine){
+      box.innerHTML = '<span class="sync-dot"></span>Synced';
+    } else {
+      box.innerHTML = '<span class="sync-dot offline"></span>Offline — will sync later';
+    }
+  }
+  window.addEventListener('online', updateSyncBox);
+  window.addEventListener('offline', updateSyncBox);
+
+  // ---------------- TASKS (Firestore) ----------------
+  function tasksCollection(){
+    return db.collection('users').doc(currentUser.uid).collection('tasks');
+  }
+
+  function attachTaskListener(){
+    updateSyncBox();
+    unsubscribe = tasksCollection().onSnapshot((snapshot) => {
+      tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      loaded = true;
+      render();
+    }, (err) => {
+      console.error('Sync error:', err);
+    });
   }
 
   function addTask(){
@@ -461,8 +765,7 @@
     if(!title) return;
     const priority = $('input-priority').value;
     const due = $('input-date').value || todayStr();
-    tasks.unshift({
-      id: uid(),
+    tasksCollection().add({
       title,
       priority,
       due,
@@ -472,23 +775,19 @@
     });
     titleEl.value = '';
     $('input-date').value = '';
-    saveTasks();
-    render();
   }
 
   function toggleTask(id){
     const t = tasks.find(x => x.id === id);
     if(!t) return;
-    t.done = !t.done;
-    t.completedAt = t.done ? Date.now() : null;
-    saveTasks();
-    render();
+    tasksCollection().doc(id).update({
+      done: !t.done,
+      completedAt: !t.done ? Date.now() : null
+    });
   }
 
   function deleteTask(id){
-    tasks = tasks.filter(x => x.id !== id);
-    saveTasks();
-    render();
+    tasksCollection().doc(id).delete();
   }
 
   function setView(view){
@@ -554,19 +853,16 @@
     if(!loaded) return;
     const today = todayStr();
 
-    // sidebar counts
     $('count-today').textContent = tasks.filter(t => !t.done && t.due <= today).length;
     $('count-upcoming').textContent = tasks.filter(t => !t.done && t.due > today).length;
     $('count-all').textContent = tasks.filter(t => !t.done).length;
     $('count-completed').textContent = tasks.filter(t => t.done).length;
 
-    // stats
     $('stat-total').textContent = tasks.length;
     $('stat-overdue').textContent = tasks.filter(t => !t.done && t.due < today).length;
     $('stat-pending').textContent = tasks.filter(t => !t.done).length;
     $('stat-done').textContent = tasks.filter(t => t.done).length;
 
-    // streak box: completed today
     const completedToday = tasks.filter(t => {
       if(!t.done || !t.completedAt) return false;
       const cd = new Date(t.completedAt);
@@ -575,23 +871,21 @@
     }).length;
     $('streak-num').textContent = completedToday;
 
-    // header
     const titles = { today:'Today', upcoming:'Upcoming', all:'All tasks', completed:'Completed' };
     $('view-title').textContent = titles[currentView];
     $('view-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
 
-    const list = getFiltered();
-    const totalForView = currentView === 'completed' ? tasks.filter(t=>t.done).length : list.length + (currentView !== 'completed' ? 0 : 0);
     $('progress-text').textContent = tasks.length
       ? `${tasks.filter(t=>t.done).length} of ${tasks.length} done`
       : 'No tasks yet';
 
+    const list = getFiltered();
     const container = $('task-container');
     if(list.length === 0){
       const emptyMsgs = {
         today: ['Nothing due today', 'Add a task above to get started.'],
         upcoming: ['No upcoming tasks', 'Tasks with a future date will show here.'],
-        all: ['You\'re all caught up', 'Add a task above to begin.'],
+        all: ["You're all caught up", 'Add a task above to begin.'],
         completed: ['Nothing completed yet', 'Finished tasks will show up here.']
       };
       const [t1,t2] = emptyMsgs[currentView];
@@ -602,7 +896,6 @@
     if(currentView === 'completed' || currentView === 'today'){
       container.innerHTML = `<div class="task-list">${list.map(renderTaskRow).join('')}</div>`;
     } else {
-      // group by due date for upcoming/all
       const groups = {};
       list.forEach(t => {
         const key = t.due;
@@ -617,7 +910,6 @@
     }
   }
 
-  // event delegation
   document.addEventListener('click', (e) => {
     const navItem = e.target.closest('.nav-item');
     if(navItem){ setView(navItem.dataset.view); return; }
@@ -634,8 +926,6 @@
   $('input-title').addEventListener('keydown', (e) => {
     if(e.key === 'Enter') addTask();
   });
-
-  loadTasks();
 })();
 </script>
 
