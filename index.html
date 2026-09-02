@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1B2A41">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
 <title>Ledger — Task Dashboard</title>
 <style>
   :root{
@@ -361,7 +365,8 @@
     border-radius:var(--radius-m);
     overflow:hidden;
   }
-  task{
+
+  .task{
     display:flex;
     align-items:center;
     gap:14px;
@@ -656,7 +661,9 @@
       pwInput.type = 'password';
       btn.textContent = 'Show';
     }
-  });$('auth-switch-btn').addEventListener('click', () => {
+  });
+
+  $('auth-switch-btn').addEventListener('click', () => {
     isSignupMode = !isSignupMode;
     hideAuthError();
     if(isSignupMode){
@@ -793,7 +800,8 @@
       el.classList.toggle('active', el.dataset.view === view);
     });
     render();
-        }
+  }
+
   function priorityRank(p){ return p === 'high' ? 0 : p === 'med' ? 1 : 2; }
 
   function getFiltered(){
@@ -922,10 +930,16 @@
   $('input-title').addEventListener('keydown', (e) => {
     if(e.key === 'Enter') addTask();
   });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch((err) => {
+        console.warn('Service worker registration failed:', err);
+      });
+    });
+  }
 })();
 </script>
 
 </body>
 </html>
-
-  
