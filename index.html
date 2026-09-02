@@ -361,8 +361,7 @@
     border-radius:var(--radius-m);
     overflow:hidden;
   }
-
-  .task{
+  task{
     display:flex;
     align-items:center;
     gap:14px;
@@ -604,12 +603,12 @@
   // PASTE YOUR FIREBASE CONFIG HERE (from Firebase Console)
   // ============================================================
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCpsTgeqEf0AMgsmK8RQob1dgnSd-oZ2qA",
+    authDomain: "ledger-app-6f5cf.firebaseapp.com",
+    projectId: "ledger-app-6f5cf",
+    storageBucket: "ledger-app-6f5cf.firebasestorage.app",
+    messagingSenderId: "351885850364",
+    appId: "1:351885850364:web:8fa6e982a6f228e428c979"
   };
   // ============================================================
 
@@ -657,9 +656,7 @@
       pwInput.type = 'password';
       btn.textContent = 'Show';
     }
-  });
-
-  $('auth-switch-btn').addEventListener('click', () => {
+  });$('auth-switch-btn').addEventListener('click', () => {
     isSignupMode = !isSignupMode;
     hideAuthError();
     if(isSignupMode){
@@ -796,8 +793,7 @@
       el.classList.toggle('active', el.dataset.view === view);
     });
     render();
-  }
-
+        }
   function priorityRank(p){ return p === 'high' ? 0 : p === 'med' ? 1 : 2; }
 
   function getFiltered(){
@@ -931,3 +927,5 @@
 
 </body>
 </html>
+
+  
