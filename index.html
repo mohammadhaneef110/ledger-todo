@@ -255,6 +255,12 @@
     flex-shrink:0;
   }
   .logout-btn:hover{ background:var(--paper-dim); color:var(--ink); }
+  .install-btn{
+    background:var(--ink);
+    color:var(--paper);
+    border:1px solid var(--ink);
+  }
+  .install-btn:hover{ opacity:0.85; background:var(--ink); color:var(--paper); }
 
   .main{
     flex:1;
@@ -561,6 +567,7 @@
       </div>
       <div class="progress-wrap">
         <div class="progress-text" id="progress-text">0 of 0 done</div>
+        <button class="logout-btn install-btn" id="install-btn" style="display:none;">Install app</button>
         <button class="logout-btn" id="logout-btn">Sign out</button>
       </div>
     </div>
@@ -939,6 +946,26 @@
       });
     });
   }
+
+  // ---------------- INSTALL PROMPT ----------------
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    $('install-btn').style.display = 'inline-block';
+  });
+
+  $('install-btn').addEventListener('click', async () => {
+    if(!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    $('install-btn').style.display = 'none';
+  });
+
+  window.addEventListener('appinstalled', () => {
+    $('install-btn').style.display = 'none';
+  });
 })();
 </script>
 
