@@ -824,26 +824,30 @@
     </div>
 
     <div class="stat-strip">
+      <div class="stat good">
+        <div class="stat-num" id="exp-balance">Rs 0</div>
+        <div class="stat-label">Balance (this month)</div>
+      </div>
       <div class="stat">
-        <div class="stat-num" id="exp-month-total">Rs 0</div>
-        <div class="stat-label">This month</div>
+        <div class="stat-num" id="exp-income">Rs 0</div>
+        <div class="stat-label">Income</div>
       </div>
       <div class="stat accent">
-        <div class="stat-num" id="exp-today-total">Rs 0</div>
-        <div class="stat-label">Today</div>
+        <div class="stat-num" id="exp-expense">Rs 0</div>
+        <div class="stat-label">Expenses</div>
       </div>
       <div class="stat">
         <div class="stat-num" id="exp-count">0</div>
         <div class="stat-label">Entries</div>
       </div>
-      <div class="stat good">
-        <div class="stat-num" id="exp-top-cat">—</div>
-        <div class="stat-label">Top category</div>
-      </div>
     </div>
 
     <div class="add-bar">
-      <input type="text" id="exp-desc" class="field-control" placeholder="What did you spend on?">
+      <select id="exp-type" class="field-control" style="max-width:130px;">
+        <option value="expense">Expense</option>
+        <option value="income">Credit / Income</option>
+      </select>
+      <input type="text" id="exp-desc" class="field-control" placeholder="Description">
       <input type="number" id="exp-amount" class="field-control" placeholder="Amount (Rs)" min="0" style="max-width:130px;">
       <select id="exp-category" class="field-control">
         <option value="Food">Food</option>
@@ -851,10 +855,12 @@
         <option value="Bills">Bills</option>
         <option value="Shopping">Shopping</option>
         <option value="Health">Health</option>
+        <option value="Salary">Salary</option>
+        <option value="Business">Business</option>
         <option value="Other">Other</option>
       </select>
       <input type="date" id="exp-date-input" class="field-control">
-      <button class="add-btn" id="exp-add-btn">Add expense</button>
+      <button class="add-btn" id="exp-add-btn">Add entry</button>
     </div>
 
     <div id="expense-container"></div>
@@ -1299,6 +1305,7 @@
   }
 
   function addExpense(){
+    const type = $('exp-type').value;
     const desc = $('exp-desc').value.trim();
     const amount = parseFloat($('exp-amount').value);
     const category = $('exp-category').value;
@@ -1307,7 +1314,7 @@
       if(!desc) $('exp-desc').focus(); else $('exp-amount').focus();
       return;
     }
-    expensesCollection().add({ description: desc, amount, category, date, createdAt: Date.now() });
+    expensesCollection().add({ type, description: desc, amount, category, date, createdAt: Date.now() });
     $('exp-desc').value = '';
     $('exp-amount').value = '';
   }
@@ -1321,10 +1328,15 @@
   }
 
   const categoryPillClass = {
-    Food: 'low', Transport: 'med', Bills: 'high', Shopping: 'violet', Health: 'gray', Other: 'gray'
+    Food: 'low', Transport: 'med', Bills: 'high', Shopping: 'violet', Health: 'gray', Other: 'gray',
+    Salary: 'low', Business: 'low'
   };
 
   function renderExpenseRow(e){
+    const type = e.type || 'expense';
+    const isIncome = type === 'income';
+    const sign = isIncome ? '+' : '−';
+    const amountColor = isIncome ? 'var(--sage)' : 'var(--coral)';
     return `
       <div class="task" data-id="${e.id}">
         <div class="task-body">
@@ -1334,8 +1346,8 @@
             <span>${fmtDate(e.date)}</span>
           </div>
         </div>
-        <div class="task-amount">${formatMoney(e.amount)}</div>
-        <button class="del-btn" data-exp-action="delete" aria-label="Delete expense">×</button>
+        <div class="task-amount" style="color:${amountColor};">${sign} ${formatMoney(e.amount)}</div>
+        <button class="del-btn" data-exp-action="delete" aria-label="Delete entry">×</button>
       </div>
     `;
   }
@@ -1345,16 +1357,17 @@
     const today = todayStr();
     const thisMonth = today.slice(0, 7);
 
-    const monthTotal = expenses.filter(e => e.date.slice(0,7) === thisMonth).reduce((s,e) => s + Number(e.amount), 0);
-    const todayTotal = expenses.filter(e => e.date === today).reduce((s,e) => s + Number(e.amount), 0);
-    $('exp-month-total').textContent = formatMoney(monthTotal);
-    $('exp-today-total').textContent = formatMoney(todayTotal);
+    const monthEntries = expenses.filter(e => e.date.slice(0,7) === thisMonth);
+    const monthIncome = monthEntries.filter(e => (e.type || 'expense') === 'income').reduce((s,e) => s + Number(e.amount), 0);
+    const monthExpense = monthEntries.filter(e => (e.type || 'expense') === 'expense').reduce((s,e) => s + Number(e.amount), 0);
+    const balance = monthIncome - monthExpense;
+
+    $('exp-balance').textContent = (balance < 0 ? '−' : '') + formatMoney(Math.abs(balance));
+    $('exp-balance').style.color = balance < 0 ? 'var(--coral)' : '';
+    $('exp-income').textContent = formatMoney(monthIncome);
+    $('exp-expense').textContent = formatMoney(monthExpense);
     $('exp-count').textContent = expenses.length;
 
-    const catTotals = {};
-    expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + Number(e.amount); });
-    const topCat = Object.keys(catTotals).sort((a,b) => catTotals[b] - catTotals[a])[0];
-    $('exp-top-cat').textContent = topCat || '—';
 
     const sorted = [...expenses].sort((a,b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
     const container = $('expense-container');
