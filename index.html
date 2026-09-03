@@ -39,9 +39,74 @@
     -webkit-font-smoothing:antialiased;
   }
 
+  /* ---------- TOP NAVBAR (suite-level) ---------- */
+  .topbar{
+    background:var(--ink);
+    color:var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 24px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .topbar-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .topbar-logo{
+    width:26px;
+    height:26px;
+    flex-shrink:0;
+  }
+  .topbar-name{
+    font-size:16px;
+    font-weight:700;
+    letter-spacing:-0.01em;
+  }
+  .topbar-menu{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    flex-wrap:wrap;
+  }
+  .topbar-link{
+    padding:7px 12px;
+    border-radius:var(--radius-s);
+    font-size:13px;
+    font-weight:600;
+    color:rgba(241,245,250,0.65);
+    cursor:pointer;
+    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .topbar-link.active{
+    background:rgba(241,245,250,0.14);
+    color:var(--paper);
+  }
+  .topbar-link.disabled{
+    cursor:default;
+    color:rgba(241,245,250,0.35);
+  }
+  .topbar-soon{
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:0.03em;
+    background:rgba(241,245,250,0.16);
+    padding:1px 6px;
+    border-radius:10px;
+  }
+  @media (max-width: 600px){
+    .topbar{ padding:10px 16px; justify-content:flex-start; }
+    .topbar-menu{ width:100%; justify-content:flex-start; }
+  }
+
   /* ---------- AUTH SCREEN ---------- */
   .auth-screen{
-    min-height:100vh;
+    min-height:calc(100vh - 58px);
     display:flex;
     align-items:center;
     justify-content:center;
@@ -156,11 +221,82 @@
   /* ---------- APP LAYOUT ---------- */
   .app{
     display:none;
-    min-height:100vh;
+    min-height:calc(100vh - 58px);
     max-width:1200px;
     margin:0 auto;
   }
   .app.show{ display:flex; }
+
+  #app-wrapper{ display:none; }
+  #app-wrapper.show{ display:block; }
+
+  .tool-page{
+    display:none;
+    max-width:900px;
+    margin:0 auto;
+  }
+  .tool-page.show{ display:block; }
+  .tool-inner{
+    padding:36px 24px 60px;
+  }
+
+  .field-group{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    flex:1;
+    min-width:160px;
+  }
+  .field-group label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    font-weight:600;
+  }
+  .field-control{
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:var(--radius-s);
+    background:var(--white);
+    font-size:14.5px;
+    font-family:var(--font);
+    color:var(--ink);
+  }
+  .field-control:focus{
+    outline:none;
+    border-color:var(--ink);
+  }
+
+  .fact-list{
+    background:var(--white);
+    border:1px solid var(--line);
+    border-radius:var(--radius-m);
+    overflow:hidden;
+  }
+  .fact-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:13px 16px;
+    border-bottom:1px solid var(--line);
+    font-size:14px;
+  }
+  .fact-row:last-child{ border-bottom:none; }
+  .fact-row .label{ color:var(--ink-soft); }
+  .fact-row .value{ font-weight:700; color:var(--ink); }
+
+  .task-amount{
+    font-weight:700;
+    font-size:14.5px;
+    color:var(--ink);
+    flex-shrink:0;
+  }
+
+  .pill.violet{ background:#E4E1F5; color:#6B5CA5; }
+  .pill.gray{ background:#E7EAEE; color:#5A6472; }
+
+  @media (max-width: 760px){
+    .tool-inner{ padding:24px 18px 50px; }
+  }
 
   .sidebar{
     width:230px;
@@ -502,10 +638,26 @@
 </head>
 <body>
 
+<!-- SUITE TOP NAVBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <svg class="topbar-logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="20" fill="#3C7A8C"/>
+      <rect x="28" y="28" width="10" height="44" fill="#F1F5FA"/>
+      <rect x="28" y="62" width="34" height="10" fill="#F1F5FA"/>
+    </svg>
+    <span class="topbar-name">Haneef Toolkit</span>
+  </div>
+  <div class="topbar-menu">
+    <div class="topbar-link active" data-tool="ledger">Ledger</div>
+    <div class="topbar-link" data-tool="age">Age Calculator</div>
+    <div class="topbar-link" data-tool="expense">Expense Manager</div>
+  </div>
+</div>
+
 <!-- AUTH SCREEN -->
 <div class="auth-screen" id="auth-screen">
   <div class="auth-box">
-    <div class="auth-brand">Ledger</div>
     <div class="auth-tag" id="auth-tag">Sign in to sync your tasks everywhere</div>
     <div class="auth-error" id="auth-error"></div>
     <div class="auth-field">
@@ -530,11 +682,13 @@
 <!-- LOADING -->
 <div class="auth-loading" id="auth-loading">Loading…</div>
 
-<!-- APP -->
-<div class="app" id="app">
+<!-- APP WRAPPER (holds all tools, shown after login) -->
+<div id="app-wrapper">
+
+<!-- TOOL: LEDGER (to-do) -->
+<div class="app show" id="view-ledger">
   <div class="sidebar">
-    <div class="brand">Ledger</div>
-    <div class="brand-tag">Your day, accounted for</div>
+    <div class="brand-tag" style="margin-bottom:20px;">Your day, accounted for</div>
 
     <div class="nav-item active" data-view="today">
       <span>Today</span><span class="nav-count" id="count-today">0</span>
@@ -606,6 +760,110 @@
   </div>
 </div>
 
+<!-- TOOL: AGE CALCULATOR -->
+<div class="tool-page" id="view-age">
+  <div class="tool-inner">
+    <div class="top-row">
+      <div>
+        <div class="view-title">Age Calculator</div>
+        <div class="view-date">Find out exactly how old someone is, down to the day</div>
+      </div>
+      <button class="logout-btn" id="logout-btn-age">Sign out</button>
+    </div>
+
+    <div class="add-bar">
+      <div class="field-group">
+        <label>Date of birth</label>
+        <input type="date" id="age-dob" class="field-control">
+      </div>
+      <div class="field-group">
+        <label>Calculate as of</label>
+        <input type="date" id="age-asof" class="field-control">
+      </div>
+      <button class="add-btn" id="age-calc-btn" style="align-self:flex-end;">Calculate</button>
+    </div>
+
+    <div id="age-empty" class="task-list"><div class="empty-state"><div class="empty-state-title">Enter a date of birth</div>Pick a date above and tap Calculate.</div></div>
+
+    <div id="age-results" style="display:none;">
+      <div class="stat-strip">
+        <div class="stat">
+          <div class="stat-num" id="age-years">0</div>
+          <div class="stat-label">Years</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="age-months">0</div>
+          <div class="stat-label">Months</div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" id="age-days">0</div>
+          <div class="stat-label">Days</div>
+        </div>
+      </div>
+
+      <div class="group-label">Additional details</div>
+      <div class="fact-list">
+        <div class="fact-row"><span class="label">Total days lived</span><span class="value" id="age-total-days">—</span></div>
+        <div class="fact-row"><span class="label">Total weeks lived</span><span class="value" id="age-total-weeks">—</span></div>
+        <div class="fact-row"><span class="label">Born on a</span><span class="value" id="age-weekday">—</span></div>
+        <div class="fact-row"><span class="label">Next birthday in</span><span class="value" id="age-next-bday">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOOL: EXPENSE MANAGER -->
+<div class="tool-page" id="view-expense">
+  <div class="tool-inner">
+    <div class="top-row">
+      <div>
+        <div class="view-title">Expense Manager</div>
+        <div class="view-date" id="expense-date"></div>
+      </div>
+      <button class="logout-btn" id="logout-btn-expense">Sign out</button>
+    </div>
+
+    <div class="stat-strip">
+      <div class="stat">
+        <div class="stat-num" id="exp-month-total">Rs 0</div>
+        <div class="stat-label">This month</div>
+      </div>
+      <div class="stat accent">
+        <div class="stat-num" id="exp-today-total">Rs 0</div>
+        <div class="stat-label">Today</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="exp-count">0</div>
+        <div class="stat-label">Entries</div>
+      </div>
+      <div class="stat good">
+        <div class="stat-num" id="exp-top-cat">—</div>
+        <div class="stat-label">Top category</div>
+      </div>
+    </div>
+
+    <div class="add-bar">
+      <input type="text" id="exp-desc" class="field-control" placeholder="What did you spend on?">
+      <input type="number" id="exp-amount" class="field-control" placeholder="Amount (Rs)" min="0" style="max-width:130px;">
+      <select id="exp-category" class="field-control">
+        <option value="Food">Food</option>
+        <option value="Transport">Transport</option>
+        <option value="Bills">Bills</option>
+        <option value="Shopping">Shopping</option>
+        <option value="Health">Health</option>
+        <option value="Other">Other</option>
+      </select>
+      <input type="date" id="exp-date-input" class="field-control">
+      <button class="add-btn" id="exp-add-btn">Add expense</button>
+    </div>
+
+    <div id="expense-container"></div>
+  </div>
+</div>
+
+</div>
+<!-- END APP WRAPPER -->
+
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
@@ -642,6 +900,9 @@
   let currentUser = null;
   let unsubscribe = null;
   let isSignupMode = false;
+  let expenses = [];
+  let expensesLoaded = false;
+  let unsubscribeExpenses = null;
 
   const $ = (id) => document.getElementById(id);
   const todayStr = () => {
@@ -722,8 +983,8 @@
     return map[code] || 'Something went wrong. Please try again.';
   }
 
-  $('logout-btn').addEventListener('click', () => {
-    auth.signOut();
+  ['logout-btn', 'logout-btn-age', 'logout-btn-expense'].forEach((id) => {
+    $(id).addEventListener('click', () => auth.signOut());
   });
 
   auth.onAuthStateChanged((user) => {
@@ -731,16 +992,38 @@
     if(user){
       currentUser = user;
       $('auth-screen').style.display = 'none';
-      $('app').classList.add('show');
+      $('app-wrapper').classList.add('show');
       attachTaskListener();
+      attachExpenseListener();
+      setActiveTool('ledger');
     } else {
       currentUser = null;
       if(unsubscribe) unsubscribe();
+      if(unsubscribeExpenses) unsubscribeExpenses();
       tasks = [];
+      expenses = [];
       loaded = false;
-      $('app').classList.remove('show');
+      expensesLoaded = false;
+      $('app-wrapper').classList.remove('show');
       $('auth-screen').style.display = 'flex';
     }
+  });
+
+  // ---------------- TOOL SWITCHING ----------------
+  let activeTool = 'ledger';
+  function setActiveTool(tool){
+    activeTool = tool;
+    document.querySelectorAll('.topbar-link').forEach(el => {
+      el.classList.toggle('active', el.dataset.tool === tool);
+    });
+    $('view-ledger').classList.toggle('show', tool === 'ledger');
+    $('view-age').classList.toggle('show', tool === 'age');
+    $('view-expense').classList.toggle('show', tool === 'expense');
+  }
+  document.querySelectorAll('.topbar-link').forEach(el => {
+    el.addEventListener('click', () => {
+      if(currentUser) setActiveTool(el.dataset.tool);
+    });
   });
 
   // network status indicator
@@ -946,6 +1229,160 @@
       });
     });
   }
+
+  // ---------------- AGE CALCULATOR ----------------
+  $('age-asof').value = todayStr();
+
+  function calcAge(dobStr, asOfStr){
+    const dob = new Date(dobStr + 'T00:00:00');
+    const asOf = new Date(asOfStr + 'T00:00:00');
+    let years = asOf.getFullYear() - dob.getFullYear();
+    let months = asOf.getMonth() - dob.getMonth();
+    let days = asOf.getDate() - dob.getDate();
+    if(days < 0){
+      months -= 1;
+      const prevMonthLastDay = new Date(asOf.getFullYear(), asOf.getMonth(), 0).getDate();
+      days += prevMonthLastDay;
+    }
+    if(months < 0){
+      years -= 1;
+      months += 12;
+    }
+    const totalDays = Math.floor((asOf - dob) / 86400000);
+    const totalWeeks = Math.floor(totalDays / 7);
+    let nextBday = new Date(asOf.getFullYear(), dob.getMonth(), dob.getDate());
+    if(nextBday < asOf) nextBday = new Date(asOf.getFullYear() + 1, dob.getMonth(), dob.getDate());
+    const daysToNextBday = Math.round((nextBday - asOf) / 86400000);
+    const weekday = dob.toLocaleDateString('en-US', { weekday: 'long' });
+    return { years, months, days, totalDays, totalWeeks, daysToNextBday, weekday };
+  }
+
+  $('age-calc-btn').addEventListener('click', () => {
+    const dob = $('age-dob').value;
+    const asOf = $('age-asof').value || todayStr();
+    if(!dob){
+      $('age-dob').focus();
+      return;
+    }
+    if(dob > asOf){
+      alert('Date of birth cannot be after the "as of" date.');
+      return;
+    }
+    const r = calcAge(dob, asOf);
+    $('age-years').textContent = r.years;
+    $('age-months').textContent = r.months;
+    $('age-days').textContent = r.days;
+    $('age-total-days').textContent = r.totalDays.toLocaleString('en-US');
+    $('age-total-weeks').textContent = r.totalWeeks.toLocaleString('en-US');
+    $('age-weekday').textContent = r.weekday;
+    $('age-next-bday').textContent = r.daysToNextBday === 0 ? 'Today!' : (r.daysToNextBday + ' days');
+    $('age-empty').style.display = 'none';
+    $('age-results').style.display = 'block';
+  });
+
+  // ---------------- EXPENSE MANAGER ----------------
+  $('exp-date-input').value = todayStr();
+  $('expense-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+
+  function expensesCollection(){
+    return db.collection('users').doc(currentUser.uid).collection('expenses');
+  }
+
+  function attachExpenseListener(){
+    unsubscribeExpenses = expensesCollection().onSnapshot((snapshot) => {
+      expenses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      expensesLoaded = true;
+      renderExpenses();
+    }, (err) => {
+      console.error('Expense sync error:', err);
+    });
+  }
+
+  function addExpense(){
+    const desc = $('exp-desc').value.trim();
+    const amount = parseFloat($('exp-amount').value);
+    const category = $('exp-category').value;
+    const date = $('exp-date-input').value || todayStr();
+    if(!desc || !amount || amount <= 0){
+      if(!desc) $('exp-desc').focus(); else $('exp-amount').focus();
+      return;
+    }
+    expensesCollection().add({ description: desc, amount, category, date, createdAt: Date.now() });
+    $('exp-desc').value = '';
+    $('exp-amount').value = '';
+  }
+
+  function deleteExpense(id){
+    expensesCollection().doc(id).delete();
+  }
+
+  function formatMoney(n){
+    return 'Rs ' + Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 });
+  }
+
+  const categoryPillClass = {
+    Food: 'low', Transport: 'med', Bills: 'high', Shopping: 'violet', Health: 'gray', Other: 'gray'
+  };
+
+  function renderExpenseRow(e){
+    return `
+      <div class="task" data-id="${e.id}">
+        <div class="task-body">
+          <div class="task-title">${escapeHtml(e.description)}</div>
+          <div class="task-meta">
+            <span class="pill ${categoryPillClass[e.category] || 'gray'}">${escapeHtml(e.category)}</span>
+            <span>${fmtDate(e.date)}</span>
+          </div>
+        </div>
+        <div class="task-amount">${formatMoney(e.amount)}</div>
+        <button class="del-btn" data-exp-action="delete" aria-label="Delete expense">×</button>
+      </div>
+    `;
+  }
+
+  function renderExpenses(){
+    if(!expensesLoaded) return;
+    const today = todayStr();
+    const thisMonth = today.slice(0, 7);
+
+    const monthTotal = expenses.filter(e => e.date.slice(0,7) === thisMonth).reduce((s,e) => s + Number(e.amount), 0);
+    const todayTotal = expenses.filter(e => e.date === today).reduce((s,e) => s + Number(e.amount), 0);
+    $('exp-month-total').textContent = formatMoney(monthTotal);
+    $('exp-today-total').textContent = formatMoney(todayTotal);
+    $('exp-count').textContent = expenses.length;
+
+    const catTotals = {};
+    expenses.forEach(e => { catTotals[e.category] = (catTotals[e.category] || 0) + Number(e.amount); });
+    const topCat = Object.keys(catTotals).sort((a,b) => catTotals[b] - catTotals[a])[0];
+    $('exp-top-cat').textContent = topCat || '—';
+
+    const sorted = [...expenses].sort((a,b) => b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
+    const container = $('expense-container');
+    if(sorted.length === 0){
+      container.innerHTML = `<div class="task-list"><div class="empty-state"><div class="empty-state-title">No expenses yet</div>Add your first expense above.</div></div>`;
+      return;
+    }
+    const groups = {};
+    sorted.forEach(e => {
+      if(!groups[e.date]) groups[e.date] = [];
+      groups[e.date].push(e);
+    });
+    const keys = Object.keys(groups).sort().reverse();
+    container.innerHTML = keys.map(k => `
+      <div class="group-label">${fmtDate(k)}</div>
+      <div class="task-list">${groups[k].map(renderExpenseRow).join('')}</div>
+    `).join('');
+  }
+
+  $('exp-add-btn').addEventListener('click', addExpense);
+  $('exp-desc').addEventListener('keydown', (e) => { if(e.key === 'Enter') addExpense(); });
+  $('exp-amount').addEventListener('keydown', (e) => { if(e.key === 'Enter') addExpense(); });
+
+  document.addEventListener('click', (e) => {
+    const taskEl = e.target.closest('#expense-container .task');
+    if(!taskEl) return;
+    if(e.target.dataset.expAction === 'delete') deleteExpense(taskEl.dataset.id);
+  });
 
   // ---------------- INSTALL PROMPT ----------------
   let deferredInstallPrompt = null;
